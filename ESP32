@@ -1,0 +1,39 @@
+#include <Arduino.h>
+
+#define POT1_PIN 34  // Pin analógico para el primer potenciómetro
+#define POT2_PIN 35  // Pin analógico para el segundo potenciómetro
+
+void setup() {
+  Serial2.begin(115200);  // Inicializar comunicación Serial2
+  Serial.begin(115200);   // Inicializar comunicación Serial
+  pinMode(POT1_PIN, INPUT); // Configurar el pin del potenciómetro 1 como entrada
+  pinMode(POT2_PIN, INPUT); // Configurar el pin del potenciómetro 2 como entrada
+}
+
+void loop() {
+  // Verificar si hay datos disponibles desde Serial2
+  if (Serial2.available() > 0) {
+    int command = Serial2.read();  // Leer el comando enviado por el STM32
+
+    Serial.print("Comando recibido: ");
+    Serial.println(command);
+
+    uint8_t outputValue = 0;
+
+    if (command == 1) {
+      int pot1Reading = analogRead(POT1_PIN);  // Leer el valor del potenciómetro 1
+      Serial.print("Lectura Potenciómetro 1: ");
+      Serial.println(pot1Reading);
+      outputValue = map(pot1Reading, 0, 4095, 0, 15); // Mapear el valor leído
+    } else if (command == 2) {
+      int pot2Reading = analogRead(POT2_PIN);  // Leer el valor del potenciómetro 2
+      Serial.print("Lectura Potenciómetro 2: ");
+      Serial.println(pot2Reading);
+      outputValue = map(pot2Reading, 0, 4095, 0, 15); // Mapear el valor leído
+    }
+
+    Serial2.write(outputValue);  // Enviar el valor mapeado de vuelta al STM32
+    Serial.print("Valor enviado: ");
+    Serial.println(outputValue);
+  }
+}
